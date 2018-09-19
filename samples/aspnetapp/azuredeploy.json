@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+      "webappName": "aspnetcoresample-118091819035509-mover",
+      "webServicePlanName": "asp-linux-test"
+    },
+    "resources": [
+      {
+        "name": "[variables('webappName')]",
+        "type": "Microsoft.Web/sites",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2015-08-01",
+        "kind": "api",
+        "dependsOn": [],
+        "properties": {
+          "name": "[variables('webappName')]",
+          "clientAffinityEnabled": false,
+          "serverFarmId": "[resourceId('testlinux', 'Microsoft.Web/serverfarms/', variables('webServicePlanName'))]",
+          "httpsOnly": true,
+          "http20Enabled": true,
+          "clientCertEnabled": false
+        },
+        "resources": [
+          {
+            "apiVersion": "2015-08-01",
+            "name": "web",
+            "type": "config",
+            "dependsOn": [
+              "[concat('Microsoft.Web/sites/', variables('webappName'))]"
+            ],
+            "properties": {
+              "cors": {
+                "allowedOrigins": [
+                  "*"
+                ]
+              },
+              "appCommandLine": "",
+              "linuxFxVersion": "DOCKER|mover/aspnetcoresample_118091819035509:latest"
+            }
+          },
+          {
+            "name": "appsettings",
+            "type": "config",
+            "apiVersion": "2015-08-01",
+            "dependsOn": [
+              "[concat('Microsoft.Web/sites/', variables('webappName'))]"
+            ],
+            "properties": {
+              "WEBSITE_DYNAMIC_CACHE": 1,
+              "WEBSITE_LOCAL_CACHE_OPTION": "Always",
+              "WEBSITE_LOCAL_CACHE_SIZEINMB": "2000",
+              "ASPNETCORE_ENVIRONMENT": "test",
+              "WEBJOBS_STOPPED": "0",
+              "APPINSIGHTS_PROFILERFEATURE_VERSION": "disabled",
+              "APPINSIGHTS_PORTALINFO": "ASP.NETCORE",
+              "WEBSITES_PORT": 80
+            }
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "resourceGroupName": {
+        "type": "string",
+        "value": "[resourceGroup().name]"
+      },
+      "webappName": {
+        "type": "string",
+        "value": "[variables('webappName')]"
+      }
+    }
+}
